@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorhythm Cleaner — Clean Your Spotify Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green-dim:#1aa34a;--bg:#0a0a0a;--surface:#141414;
+  --surface2:#1e1e1e;--text:#e8e8e8;--text-dim:#999;--danger:#e74c3c;
+  --radius:12px;--font-body:'DM Sans',sans-serif;--font-display:'Fraunces',serif;
+}
+html{font-size:16px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:2rem 1rem}
+h1,h2,h3{font-family:var(--font-display);font-weight:700}
+a{color:var(--green)}
+
+.container{max-width:680px;width:100%}
+
+header{text-align:center;margin-bottom:2.5rem}
+header h1{font-size:2.2rem;margin-bottom:.3rem}
+header h1 span{color:var(--green)}
+header p{color:var(--text-dim);font-size:.95rem}
+
+.card{background:var(--surface);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem}
+.card h2{font-size:1.15rem;margin-bottom:.75rem}
+
+label{display:block;font-size:.85rem;color:var(--text-dim);margin-bottom:.35rem}
+input[type=text]{width:100%;padding:.65rem .85rem;border-radius:8px;border:1px solid #333;
+  background:var(--surface2);color:var(--text);font-size:.95rem;font-family:var(--font-body)}
+input[type=text]:focus{outline:none;border-color:var(--green)}
+
+button{font-family:var(--font-body);cursor:pointer;border:none;border-radius:8px;
+  font-size:.95rem;font-weight:500;padding:.7rem 1.5rem;transition:opacity .15s}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover:not(:disabled){opacity:.85}
+.btn-outline{background:transparent;color:var(--green);border:1px solid var(--green)}
+.btn-outline:hover:not(:disabled){background:var(--green);color:#000}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:.45rem 1rem;font-size:.85rem}
+
+.step-badge{display:inline-block;background:var(--green);color:#000;font-weight:700;
+  width:1.6rem;height:1.6rem;border-radius:50%;text-align:center;line-height:1.6rem;
+  font-size:.8rem;margin-right:.5rem;vertical-align:middle}
+
+#status{margin-top:.75rem;font-size:.85rem;color:var(--text-dim);min-height:1.2rem}
+.progress-bar{height:4px;background:#333;border-radius:2px;margin-top:.5rem;overflow:hidden}
+.progress-bar .fill{height:100%;background:var(--green);transition:width .3s;width:0}
+
+.results-list{max-height:420px;overflow-y:auto;margin:.75rem 0}
+.results-list::-webkit-scrollbar{width:6px}
+.results-list::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+
+.track-item{display:flex;align-items:center;gap:.65rem;padding:.55rem .4rem;
+  border-bottom:1px solid #222;font-size:.88rem}
+.track-item:last-child{border-bottom:none}
+.track-item input[type=checkbox]{accent-color:var(--green);width:16px;height:16px;flex-shrink:0}
+.track-item .info{flex:1;min-width:0}
+.track-item .title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-item .artist{color:var(--text-dim);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-item .source{color:var(--text-dim);font-size:.75rem;font-style:italic;white-space:nowrap}
+
+.summary{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+.summary .stat{text-align:center}
+.summary .stat .num{font-size:1.5rem;font-weight:700;color:var(--green);font-family:var(--font-display)}
+.summary .stat .label{font-size:.75rem;color:var(--text-dim)}
+
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+
+.instructions{background:var(--surface2);border-radius:8px;padding:1rem;font-size:.85rem;line-height:1.55}
+.instructions ol{padding-left:1.2rem;margin-top:.5rem}
+.instructions li{margin-bottom:.35rem}
+
+.hidden{display:none!important}
+
+footer{margin-top:2rem;text-align:center;font-size:.78rem;color:#555}
+footer a{color:#777}
+
+@media(max-width:500px){
+  header h1{font-size:1.6rem}
+  .card{padding:1.1rem}
+  .summary{gap:1rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎵 <span>Algorhythm</span> Cleaner</h1>
+    <p>Reclaim your Spotify recommendations from kids' music</p>
+  </header>
+
+  <!-- Step 1: Connect -->
+  <div class="card" id="step-connect">
+    <h2><span class="step-badge">1</span>Connect to Spotify</h2>
+    <label for="clientId">Your Spotify Developer Client ID</label>
+    <input type="text" id="clientId" placeholder="e.g. a1b2c3d4e5f6…" spellcheck="false" autocomplete="off">
+    <div style="margin-top:.85rem">
+      <button class="btn-primary" id="btnConnect" onclick="startAuth()">Connect</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <!-- Step 2: Scan -->
+  <div class="card hidden" id="step-scan">
+    <h2><span class="step-badge">2</span>Scan Your Library</h2>
+    <p style="font-size:.88rem;color:var(--text-dim);margin-bottom:.75rem">
+      We'll check your playlists, saved tracks, and recently played for kids' music patterns.
+    </p>
+    <button class="btn-primary" id="btnScan" onclick="startScan()">Scan Now</button>
+    <div id="scanStatus" style="margin-top:.65rem;font-size:.85rem;color:var(--text-dim)"></div>
+    <div class="progress-bar hidden" id="progressBar"><div class="fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Step 3: Results -->
+  <div class="card hidden" id="step-results">
+    <h2><span class="step-badge">3</span>Review Matches</h2>
+    <div class="summary" id="summary"></div>
+    <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:.5rem">
+      Uncheck any false positives before creating the playlist.
+    </p>
+    <div class="actions" style="margin-bottom:.5rem">
+      <button class="btn-sm btn-outline" onclick="selectAll(true)">Select All</button>
+      <button class="btn-sm btn-outline" onclick="selectAll(false)">Deselect All</button>
+      <span style="font-size:.82rem;color:var(--text-dim)" id="selectedCount"></span>
+    </div>
+    <div class="results-list" id="resultsList"></div>
+    <div style="margin-top:.85rem">
+      <button class="btn-primary" id="btnCreate" onclick="createPlaylist()">Create Exclude Playlist</button>
+    </div>
+    <div id="createStatus" style="margin-top:.65rem;font-size:.85rem;color:var(--text-dim)"></div>
+  </div>
+
+  <!-- Step 4: Done -->
+  <div class="card hidden" id="step-done">
+    <h2><span class="step-badge">✓</span>Almost Done!</h2>
+    <p style="font-size:.9rem;margin-bottom:.75rem">
+      Playlist <strong>"Kids Music — Exclude Me"</strong> has been created. Now tell Spotify to ignore it:
+    </p>
+    <div class="instructions">
+      <ol>
+        <li>Open Spotify (desktop or mobile)</li>
+        <li>Go to <strong>Your Library → Playlists</strong></li>
+        <li>Find <strong>"Kids Music — Exclude Me"</strong></li>
+        <li>Tap the <strong>⋯</strong> menu → <strong>Exclude from your Taste Profile</strong></li>
+        <li>Done! Spotify will stop using those tracks to shape your recommendations.</li>
+      </ol>
+    </div>
+    <p style="font-size:.82rem;color:var(--text-dim);margin-top:.75rem">
+      💡 Tip: Keep the playlist around. You can re-run this tool anytime to catch new kids' music.
+    </p>
+  </div>
+
+  <footer>
+    <p>No data is stored. Runs entirely in your browser. <a href="https://github.com/2ooks/algorhythm-cleaner">GitHub</a></p>
+  </footer>
+</div>
+
+<script>
+// === CONFIG ===
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+const SCOPES = [
+  'playlist-read-private','playlist-read-collaborative',
+  'playlist-modify-private','user-library-read','user-read-recently-played'
+].join(' ');
+
+// === KIDS MUSIC PATTERNS (~120) ===
+const KIDS_ARTISTS = [
+  'cocomelon','pinkfong','baby shark','little baby bum','super simple songs',
+  'dave and ava','badanamu','blippi','bounce patrol','chu chu tv','chuchutv',
+  'el reino infantil','hey bear sensory','kids tv','little angel','little treehouse',
+  'mother goose club','nursery rhymes','toddler tunes','bob the train',
+  'kidz bop','rockabye baby','caspar babypants','the kiboomers','jack hartmann',
+  'super jojo','beby','littlebabybum','baby bus','babybus','lullaby baby',
+  'sleepy baby','white noise baby','twinkle twinkle','itsy bitsy spider',
+  'wheels on the bus','five little monkeys','johny johny','raffi',
+  'the wiggles','wiggles','hi-5','sesame street','barney','teletubbies',
+  'baby einstein','peppa pig','paw patrol','bluey','gabby\'s dollhouse',
+  'gabby dollhouse','cocomelon lane','ms. rachel','ms rachel','miss rachel',
+  'daniel tiger','yo gabba gabba','dora the explorer','spongebob',
+  'bubble guppies','team umizoomi','shimmer and shine','dino ranch',
+  'laurie berkner','lisa loeb kids','elizabeth mitchell','justin roberts',
+  'secret agent 23 skidoo','alphabet rockers','lucky diaz',
+  'storybots','ask the storybots','numberblocks','numberblok',
+  'disney junior','mickey mouse clubhouse','doc mcstuffins',
+  'vampirina','muppet babies','puppy dog pals','tots',
+  'lullaby renditions','twinkle twinkle little rock star',
+  'sweet little band','baby lullaby','music box lullaby',
+  'fisher price','leapfrog','vtech','abc kids','abc mouse','abcmouse'
+];
+
+const KIDS_TRACK_PATTERNS = [
+  'baby shark','let it go','into the unknown','do you want to build a snowman',
+  'love is an open door','in summer','fixer upper','reindeers are better',
+  'some things never change','show yourself','all is found',
+  'we don\'t talk about bruno','surface pressure','what else can i do',
+  'the family madrigal','waiting on a miracle','encanto','colombian',
+  'how far i\'ll go','you\'re welcome','shiny','we know the way',
+  'where you are','i am moana','an innocent warrior',
+  'hakuna matata','circle of life','can you feel the love','be prepared',
+  'i just can\'t wait to be king','he lives in you',
+  'a whole new world','friend like me','prince ali','arabian nights',
+  'under the sea','part of your world','kiss the girl','poor unfortunate souls',
+  'colors of the wind','just around the riverbend','steady as the beating drum',
+  'reflection','i\'ll make a man out of you','a girl worth fighting for',
+  'honor to us all','true love\'s kiss','that\'s how you know',
+  'happy working song','ever ever after',
+  'let it go frozen','remember me coco','un poco loco','la llorona coco',
+  'proud corazón','much needed advice','everyone knows julieta',
+  'bear necessities','i wanna be like you','trust in me',
+  'bibbidi-bobbidi-boo','a dream is a wish','so this is love',
+  'supercalifragilisticexpialidocious','a spoonful of sugar','chim chim cher-ee',
+  'feed the birds','step in time','jolly holiday',
+  'when you wish upon a star','give a little whistle','hi-diddle-dee-dee',
+  'you\'ve got a friend in me','strange things','i will go sailing no more',
+  'when she loved me','we belong together',
+  'abc song','alphabet song','baa baa black sheep','humpty dumpty',
+  'old macdonald','mary had a little lamb','twinkle twinkle little star',
+  'row your boat','itsy bitsy spider','jack and jill','london bridge',
+  'hickory dickory dock','wheels on the bus','head shoulders knees and toes',
+  'if you\'re happy and you know it','ring around the rosie','rock-a-bye baby',
+  'hush little baby','five little ducks','five little monkeys',
+  'incy wincy spider','three blind mice','one two buckle my shoe',
+  'pat-a-cake','this old man','pop goes the weasel',
+  'hot dog hot dog','mickey mouse march','yo ho (a pirate\'s life)',
+  'jake and the never land','sofia the first','doc mcstuffins theme',
+  'jungle junction','special agent oso','handy manny',
+  'moana soundtrack','frozen soundtrack','encanto soundtrack',
+  'coco soundtrack','tangled soundtrack','disney princess',
+  'nursery rhyme','lullaby for babies','baby sleep music',
+  'kids songs','toddler songs','children\'s music','songs for kids',
+  'bedtime lullaby','baby white noise','baby relaxing music'
+];
+
+const DISNEY_ALBUM_PATTERNS = [
+  'frozen','encanto','moana','coco','tangled','disney','lion king',
+  'little mermaid','aladdin','beauty and the beast','mulan',
+  'pocahontas','toy story','lullabies','nursery','kids','children'
+];
+
+// === STATE ===
+let accessToken = null;
+let userId = null;
+let foundTracks = [];
+
+// === PKCE HELPERS ===
+function generateRandom(len){
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function sha256(plain){
+  const enc = new TextEncoder().encode(plain);
+  return await crypto.subtle.digest('SHA-256', enc);
+}
+function base64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+// === AUTH ===
+async function startAuth(){
+  const cid = document.getElementById('clientId').value.trim();
+  if(!cid||cid.length<10){setStatus('Please enter a valid Client ID.');return}
+  sessionStorage.setItem('sp_client_id', cid);
+  const verifier = generateRandom(64);
+  sessionStorage.setItem('sp_code_verifier', verifier);
+  const challenge = base64url(await sha256(verifier));
+  const state = generateRandom(16);
+  sessionStorage.setItem('sp_auth_state', state);
+  const params = new URLSearchParams({
+    client_id: cid,
+    response_type: 'code',
+    redirect_uri: REDIRECT_URI,
+    scope: SCOPES,
+    code_challenge_method: 'S256',
+    code_challenge: challenge,
+    state: state
+  });
+  window.location = 'https://accounts.spotify.com/authorize?' + params;
+}
+
+async function handleCallback(){
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state');
+  if(!code) return false;
+  if(state !== sessionStorage.getItem('sp_auth_state')){
+    setStatus('Auth state mismatch. Please try again.');return true;
+  }
+  window.history.replaceState({}, document.title, window.location.pathname);
+  setStatus('Exchanging authorization code…');
+  const cid = sessionStorage.getItem('sp_client_id');
+  const verifier = sessionStorage.getItem('sp_code_verifier');
+  try{
+    const resp = await fetch('https://accounts.spotify.com/api/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({
+        client_id: cid,
+        grant_type:'authorization_code',
+        code: code,
+        redirect_uri: REDIRECT_URI,
+        code_verifier: verifier
+      })
+    });
+    const data = await resp.json();
+    if(data.error){setStatus('Token error: '+data.error_description);return true}
+    accessToken = data.access_token;
+    sessionStorage.removeItem('sp_code_verifier');
+    sessionStorage.removeItem('sp_auth_state');
+    const me = await spotifyGet('https://api.spotify.com/v1/me');
+    userId = me.id;
+    setStatus('Connected as '+me.display_name);
+    document.getElementById('step-connect').classList.add('hidden');
+    document.getElementById('step-scan').classList.remove('hidden');
+  }catch(e){setStatus('Auth failed: '+e.message)}
+  return true;
+}
+
+// === SPOTIFY API ===
+async function spotifyGet(url, retries=5){
+  for(let i=0;i<retries;i++){
+    const resp = await fetch(url, {headers:{'Authorization':'Bearer '+accessToken}});
+    if(resp.status===429){
+      const wait = parseInt(resp.headers.get('Retry-After')||'2',10);
+      await sleep((wait+1)*1000);
+      continue;
+    }
+    if(resp.status===401){setStatus('Session expired. Please reconnect.');throw new Error('401')}
+    if(!resp.ok) throw new Error('API '+resp.status);
+    return await resp.json();
+  }
+  throw new Error('Rate limited after retries');
+}
+
+async function spotifyPost(url, body, retries=5){
+  for(let i=0;i<retries;i++){
+    const resp = await fetch(url,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(resp.status===429){
+      const wait = parseInt(resp.headers.get('Retry-After')||'2',10);
+      await sleep((wait+1)*1000);
+      continue;
+    }
+    if(!resp.ok) throw new Error('API '+resp.status);
+    return await resp.json();
+  }
+  throw new Error('Rate limited after retries');
+}
+
+async function fetchAllPages(url, key){
+  const items = [];
+  let next = url;
+  while(next){
+    const data = await spotifyGet(next);
+    const container = key ? data[key] : data;
+    items.push(...(container.items||[]));
+    next = container.next;
+  }
+  return items;
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// === MATCHING ===
+function isKidsMusic(track){
+  if(!track||!track.name) return null;
+  const name = track.name.toLowerCase();
+  const artists = (track.artists||[]).map(a=>a.name.toLowerCase());
+  const album = (track.album?.name||'').toLowerCase();
+  for(const pattern of KIDS_ARTISTS){
+    for(const artist of artists){
+      if(artist.includes(pattern)) return 'Artist: '+pattern;
+    }
+  }
+  for(const pattern of KIDS_TRACK_PATTERNS){
+    if(name.includes(pattern)) return 'Track: '+pattern;
+  }
+  for(const pattern of DISNEY_ALBUM_PATTERNS){
+    if(album.includes(pattern)){
+      for(const tp of KIDS_TRACK_PATTERNS){
+        if(name.includes(tp)) return 'Album+Track: '+pattern+' / '+tp;
+      }
+    }
+  }
+  return null;
+}
+
+// === SCAN ===
+async function startScan(){
+  document.getElementById('btnScan').disabled = true;
+  const bar = document.getElementById('progressBar');
+  const fill = document.getElementById('progressFill');
+  bar.classList.remove('hidden');
+  const scanSt = document.getElementById('scanStatus');
+  foundTracks = [];
+  const seen = new Set();
+
+  function addMatch(track, source, reason){
+    const key = track.uri || (track.name+track.artists.map(a=>a.name).join());
+    if(seen.has(key)) return;
+    seen.add(key);
+    foundTracks.push({track, source, reason, selected:true});
+  }
+
+  try{
+    // 1. Playlists
+    scanSt.textContent = 'Fetching playlists…';
+    fill.style.width = '5%';
+    const playlists = await fetchAllPages('https://api.spotify.com/v1/me/playlists?limit=50');
+    const totalSteps = playlists.length + 2;
+    let done = 0;
+
+    for(const pl of playlists){
+      scanSt.textContent = `Scanning playlist: ${pl.name} (${done+1}/${playlists.length})`;
+      fill.style.width = Math.round(((done+1)/totalSteps)*100)+'%';
+      try{
+        const tracks = await fetchAllPages(pl.tracks.href+'?limit=100');
+        for(const item of tracks){
+          if(!item.track) continue;
+          const reason = isKidsMusic(item.track);
+          if(reason) addMatch(item.track, 'Playlist: '+pl.name, reason);
+        }
+      }catch(e){/* skip inaccessible playlists */}
+      done++;
+    }
+
+    // 2. Saved tracks
+    scanSt.textContent = 'Scanning saved tracks…';
+    fill.style.width = Math.round(((done+1)/totalSteps)*100)+'%';
+    const saved = await fetchAllPages('https://api.spotify.com/v1/me/tracks?limit=50');
+    for(const item of saved){
+      if(!item.track) continue;
+      const reason = isKidsMusic(item.track);
+      if(reason) addMatch(item.track, 'Liked Songs', reason);
+    }
+    done++;
+
+    // 3. Recently played
+    scanSt.textContent = 'Scanning recent history…';
+    fill.style.width = Math.round(((done+1)/totalSteps)*100)+'%';
+    try{
+      const recent = await spotifyGet('https://api.spotify.com/v1/me/player/recently-played?limit=50');
+      for(const item of (recent.items||[])){
+        if(!item.track) continue;
+        const reason = isKidsMusic(item.track);
+        if(reason) addMatch(item.track, 'Recently Played', reason);
+      }
+    }catch(e){/* recently-played may fail */}
+
+    fill.style.width = '100%';
+    scanSt.textContent = `Scan complete. Found ${foundTracks.length} kids' music tracks.`;
+    showResults();
+  }catch(e){
+    scanSt.textContent = 'Scan error: '+e.message;
+    document.getElementById('btnScan').disabled = false;
+  }
+}
+
+// === RESULTS ===
+function showResults(){
+  if(foundTracks.length===0){
+    document.getElementById('scanStatus').textContent = '🎉 No kids' music found! Your algorithm is clean.';
+    return;
+  }
+  const sec = document.getElementById('step-results');
+  sec.classList.remove('hidden');
+
+  const playlists = new Set(foundTracks.map(f=>f.source));
+  document.getElementById('summary').innerHTML = `
+    <div class="stat"><div class="num">${foundTracks.length}</div><div class="label">Tracks Found</div></div>
+    <div class="stat"><div class="num">${new Set(foundTracks.map(f=>f.track.artists[0]?.name)).size}</div><div class="label">Artists</div></div>
+    <div class="stat"><div class="num">${playlists.size}</div><div class="label">Sources</div></div>
+  `;
+
+  renderList();
+}
+
+function renderList(){
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+  foundTracks.forEach((item,i)=>{
+    const div = document.createElement('div');
+    div.className = 'track-item';
+    div.innerHTML = `
+      <input type="checkbox" ${item.selected?'checked':''} onchange="foundTracks[${i}].selected=this.checked;updateCount()">
+      <div class="info">
+        <div class="title">${esc(item.track.name)}</div>
+        <div class="artist">${esc(item.track.artists.map(a=>a.name).join(', '))}</div>
+      </div>
+      <div class="source">${esc(item.reason)}</div>
+    `;
+    list.appendChild(div);
+  });
+  updateCount();
+}
+
+function selectAll(val){
+  foundTracks.forEach(f=>f.selected=val);
+  renderList();
+}
+
+function updateCount(){
+  const n = foundTracks.filter(f=>f.selected).length;
+  document.getElementById('selectedCount').textContent = n+' selected';
+  document.getElementById('btnCreate').disabled = n===0;
+}
+
+function esc(s){
+  const d=document.createElement('div');d.textContent=s;return d.innerHTML;
+}
+
+// === CREATE PLAYLIST ===
+async function createPlaylist(){
+  const selected = foundTracks.filter(f=>f.selected);
+  if(!selected.length) return;
+  const btn = document.getElementById('btnCreate');
+  const st = document.getElementById('createStatus');
+  btn.disabled = true;
+  st.textContent = 'Creating playlist…';
+
+  try{
+    const pl = await spotifyPost(`https://api.spotify.com/v1/users/${userId}/playlists`,{
+      name:'Kids Music — Exclude Me',
+      description:'Auto-generated by Algorhythm Cleaner. Exclude this playlist from your Taste Profile in Spotify settings.',
+      public: false
+    });
+
+    // Add tracks in batches of 100
+    const uris = selected.map(f=>f.track.uri).filter(Boolean);
+    for(let i=0;i<uris.length;i+=100){
+      st.textContent = `Adding tracks (${Math.min(i+100,uris.length)}/${uris.length})…`;
+      await spotifyPost(pl.href+'/tracks',{uris: uris.slice(i,i+100)});
+    }
+
+    st.textContent = `Playlist created with ${uris.length} tracks!`;
+    document.getElementById('step-done').classList.remove('hidden');
+  }catch(e){
+    st.textContent = 'Error: '+e.message;
+    btn.disabled = false;
+  }
+}
+
+// === UTILS ===
+function setStatus(msg){document.getElementById('status').textContent=msg}
+
+// === INIT ===
+(async()=>{
+  const saved = sessionStorage.getItem('sp_client_id');
+  if(saved) document.getElementById('clientId').value = saved;
+  await handleCallback();
+})();
+</script>
+</body>
+</html>
